@@ -21,7 +21,7 @@ def with_db_connection(func):
                 conn.close()
     return wrapper
 
-def retry_on_failure(retries=3, delay=1):
+def retry_on_failure(retries=3, delay=2):
     def decorator(func):
         functools.wraps(func)
         def wrapper(conn, *args, **kwargs):
