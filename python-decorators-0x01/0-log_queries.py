@@ -8,7 +8,7 @@ def log_queries(func):
         query_arg = ""
         if 'query' in kwargs:
             query_arg = kwargs['query']
-        if 'query' in args:
+        elif args:
             query_arg = args[0]
         print(f"Executing Query: {query_arg}")
         result = func(*args, **kwargs)
