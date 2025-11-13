@@ -15,7 +15,7 @@ async def async_fetch_older_users():
         results = await cursor.fetchall()
         return results
 
-async def main():
+async def fetch_concurrently():
     tasks = [
         async_fetch_users(),
         async_fetch_older_users()
@@ -25,4 +25,4 @@ async def main():
     return all_results
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(fetch_concurrently())
