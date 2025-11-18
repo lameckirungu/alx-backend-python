@@ -10,17 +10,15 @@ ROLE_CHOICES = [
 ]
 
 class User(AbstractUser):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False)
+    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False)
     email = models.EmailField(unique=True, db_index=True)
     username = None # Overriding username related fields. Using email as Unique ID
     phone_number = models.CharField(max_length=15, null=True, blank=True)
     role = models.CharField(choices=ROLE_CHOICES, default='guest', max_length=10)
-    
+    password_hash = models.CharField(max_length=128)
     USERNAME_FIELD = 'email' # Using email as the unique Identifier
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
-    def __str__(self):
-        return self.email
 
 class Message(models.Model):
     message_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
