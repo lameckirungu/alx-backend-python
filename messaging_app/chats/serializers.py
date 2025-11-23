@@ -3,14 +3,22 @@ from rest_framework import serializers
 from .models import User, Conversation, Message
 
 class UserSerializer(serializers.ModelSerializer):
+    """Serializer to represent the User in a chat context."""
+
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
     class Meta:
         model = User
         fields = ['user_id', 'email', 'first_name', 'last_name', 'role']
-    pass
 
 class MessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True)
-    sender_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True)
+    # Using PrimaryKeyRlelatedField for writing(sending) the message
+    sender_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), 
+        write_only=True,
+        source='sender'
+    )
 
     class Meta:
         model = Message
