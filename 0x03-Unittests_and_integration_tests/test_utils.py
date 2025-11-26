@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Unit tests for utils.py"""
-from unittest import TestCase
+
+import unittest  
 from unittest.mock import patch, Mock
 from parameterized import parameterized
 from utils import access_nested_map, get_json
@@ -35,12 +36,12 @@ class TestAccessNestedMap(unittest.TestCase):
             access_nested_map(nested_map, path)
         self.assertEqual(str(cm.exception), f"'{path[-1]}'")
         
-class TestGetJson(TestCase):
+class TestGetJson(unittest.TestCase):
     """
     Tests `utils.get_json` function.
     """
     @parameterized.expand([
-        ("htpps://example.com", {"payload": True}),
+        ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False}),
     ])
     
@@ -57,4 +58,3 @@ class TestGetJson(TestCase):
             result = get_json(test_url)
             self.assertEqual(result, expected_payload)
             mocked_get.assert_called_once_with(test_url)
-            
