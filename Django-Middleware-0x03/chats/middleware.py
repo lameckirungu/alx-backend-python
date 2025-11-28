@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from django.http import JsonResponse
 
 # Configure logger to write to 'requests.log' file
 logger = logging.getLogger('request_logger')
@@ -47,3 +48,56 @@ class RestrictAccessByTimeMiddleware:
             return HttpResponseForbidden("Access to the messaging app is restricted during this time.")
         response = self.get_response(request)
         return response
+    
+
+RATE_LIMIT_STORE = {}
+MAX_MESSAGES = 5
+TIME_WINDOW = 60  # seconds
+
+"""
+    Middleware to limit number of chat messages a user can send
+    within a certain timeframe, based on their IP address.
+"""
+
+class OffensiveLanguageMiddleware: # Misleading name
+    """
+     Tracks number of requests from an IP address and limits access if threshold exceeded.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+        
+    def __call__(self, request):
+
+        if request.method == 'POST' AND request.path.startswith('/chats/send_message/'):
+            ip = self.get_client_ip(request)
+            now = datetime.now()
+            
+            # Get or Initialize timestamps for this IP
+            if ip not in RATE_LIMIT_STORE:
+                RATE_LIMIT_STORE[ip] = []
+            timestamps = RATE_LIMIT_STORE[ip]
+
+            # Remove timestamps older than 1 minute
+            timestamps = [t for t in timestamps if (now -t) < TIME_WINDOW]
+            RATE_LIMIT_STORE[ip] = timestamps
+
+            if len(timestamps) >= MAX_MESSAGES:
+                return JsonResponse({
+                    'error': 'Rate limit exceeded. Maximum 5 messages per minute allowed.'
+                }, status=429)
+            timestamps.append(now)
+
+        response = self.get_response(request)
+        return response
+    
+    def get_client_ip(self, request):
+        """
+        Get Real IP behind Proxy if any
+        """
+
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0].strip()
+        else:
+            ip = request.META.get('REMOTE_ADDR', 'unknown')
+        return ip

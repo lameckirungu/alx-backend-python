@@ -57,6 +57,7 @@ MIDDLEWARE = [
     # Custom Middlewares
     'chats.middleware.RequestLoggingMiddleware',
     'chats.middleware.RestrictAccessByTimeMiddleware',
+    'chats.middleware.OffensiveLanguageFilterMiddleware',
 ]
 
 
