@@ -68,7 +68,7 @@ class OffensiveLanguageMiddleware: # Misleading name
         
     def __call__(self, request):
 
-        if request.method == 'POST' AND request.path.startswith('/chats/send_message/'):
+        if request.method == 'POST' and request.path.startswith('/chats/send_message/'):
             ip = self.get_client_ip(request)
             now = datetime.now()
             
@@ -101,3 +101,22 @@ class OffensiveLanguageMiddleware: # Misleading name
         else:
             ip = request.META.get('REMOTE_ADDR', 'unknown')
         return ip
+
+class RolepermissionMiddleware:
+    """
+    Middleware to enforce role-based access control
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = request.user
+        if request.path.startswith('/chats/admin/') and (not user.is_authenticated or user.role != 'admin' or 'moderator'):
+            return JsonResponse({
+                'error': 'Admin access required.'
+            }, status=403
+            )
+        
+        response = self.get_response(request)
+        return response
