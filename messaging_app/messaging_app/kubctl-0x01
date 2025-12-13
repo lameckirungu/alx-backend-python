@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+kubectl scale deployment messaging-app --replicas=3
+sleep 10 # Wait for the new pods to start up
+kubectl get pods 
+
+#Getting external service URL
+SERVICE_URL = $(minikube service messaging-service --url)
+
+if [ -z "$SERVICE_URL" ]; then
+    echo "ERROR: could not get Service URL from Minikube. Exiting load test."
+else
+    echo "Serivce URL is: $SERVICE_URL. Performing load test now..."
+    wrk -t4 c10 d5s "$SERVICE_URL"
+fi
+# Resource usage
+kubectl top node
+kubectl top pod
