@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+SERVICE_URL = $(minikube service messaging-service --url)
+
+if [ -z "$SERVICE_URL" ]; then
+    exit 1
+fi
+
+while true; do
+    curl -s -o /dev/null -w "%{http_code}\n "$SERVICE_URL"
+    sleep 1
+done &
+CURL_PID=$!
+
+kubectl apply -f blue_deployment.yaml
+kill $CURL_PID
+WAIT $CURL_PID 2>/dev/null
+kubectl rollout status deployment/message-app-blue
+kubectl get pods -l version=blue
