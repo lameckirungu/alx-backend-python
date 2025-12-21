@@ -16,7 +16,7 @@ pipeline {
         stage('Install Dependencies & Test') {
             steps {
                 sh 'pip3 install -r messaging_app/requirements.txt'
-                sh 'pytest --junitxml=reports/test-results.xml'
+                sh 'pytest messaging_app/tests --junitxml=reports/test-results.xml'
             }
         }
         stage('Deploy') {
