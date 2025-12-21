@@ -1,5 +1,5 @@
 pipeline {
-    agent docker { image 'python:3.11'}
+    agent any
 
     environment {
         GITHUB_CREDS = credentials('github-auth-id')
@@ -7,22 +7,23 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/lameckirungu/alx-backend-python/tree/main/messaging_app'
-                    branch: 'main',
-                    credentialsId: 'github-auth-id'
+                git branch: 'main',
+                    credentialsId: 'github-auth-id',
+                    url: 'https://github.com/lameckirungu/alx-backend-python.git'
+                    
             }
         }
-        stage('Install Dependencies') {
+        stage('Install Dependencies & Test') {
             steps {
-                sh 'pip install -r requirements.txt'
+                sh 'pip3 install -r messaging_app/requirements.txt'
                 sh 'pytest --junitxml=reports/test-results.xml'
             }
         }
         stage('Deploy') {
             steps {
                 sh '''
-                docker build -t lameckirungu/alx-backend-python/messaging_app
-                docker push lameckirungu/alx-backend-python/messaging_app:${GIT_COMMIT}
+                docker build -t lameckirungu/messaging_app:latest .
+                docker push lameckirungu/messaging_app:latest
                 '''
                 echo 'Deployed!'
             }
