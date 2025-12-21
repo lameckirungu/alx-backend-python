@@ -10,7 +10,6 @@ pipeline {
                 git branch: 'main',
                     credentialsId: 'github-auth-id',
                     url: 'https://github.com/lameckirungu/alx-backend-python.git'
-                    
             }
         }
         stage('Install Dependencies & Test') {
