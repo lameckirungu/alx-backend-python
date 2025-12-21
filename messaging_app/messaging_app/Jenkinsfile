@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    environment {
+        GITHUB_CREDS = credentials('github-auth-id')
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'github-auth-id',
+                    url: 'https://github.com/lameckirungu/alx-backend-python.git'
+                    
+            }
+        }
+        stage('Install Dependencies & Test') {
+            steps {
+                sh 'pip install -r requirements.txt'
+                sh 'pytest --junitxml=reports/test-results.xml'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh '''
+                docker build -t lameckirungu/messaging_app:latest .
+                docker push lameckirungu/messaging_app:latest
+                '''
+                echo 'Deployed!'
+            }
+        }
+        stage('Report') {
+            steps {
+                junit 'reports/test-results.xml'
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
