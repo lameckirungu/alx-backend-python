@@ -1,0 +1,48 @@
+name: Django CI Tests
+
+on:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+    
+        services:
+            mysql:
+                image: mysql:8.0
+                env:
+                    MYSQL_ROOT_PASSWORD: SJabxKEYQQ09 
+                    MYSQL_DATABASE: test__messaging_db
+                    MYSQL_USER: django_user
+                    MYSQL_PASSWORD: SJabxKEYQQ09
+                ports:
+                    - 3306:3306
+                options: >-
+                    --health-cmd="mysqladmin ping --silent"
+                    --health-interval=10s
+                    --health-timeout=5s
+                    --health-retries=3
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                python-version: '3.11'
+
+            - name: Install dependencies
+              run: |
+                python -m pip install --upgrade pip
+                pip install -r requirements.txt
+                pip install mysqlclient # Required for Django to talk to MySQL
+
+            - name: Run Django tests
+              env:
+                DATABASE_URL: mysql://root:SJabxKEYQQ09@localhost:3306/test_db
+              run: |
+                python manage.py test
